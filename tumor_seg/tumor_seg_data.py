@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# In[54]:
+
+
 import os
 import cv2
 import glob
@@ -27,8 +30,14 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 torch.manual_seed(161)
 
+# In[ ]:
+
+
 TRAIN_DATASET_PATH = "MICCAI_BraTS_2019_Data_Training/LGG/"
 TEST_DATASET_PATH = "MICCAI_BraTS_2019_Data_Training/LGG/"
+
+
+# In[35]:
 
 
 # load .nii file as a numpy array
@@ -38,8 +47,14 @@ print("Shape: ", test_image_flair.shape)
 print("Dtype: ", test_image_flair.dtype)
 
 
+# In[36]:
+
+
 print("Min: ", test_image_flair.min())
 print("Max: ", test_image_flair.max())
+
+
+# In[37]:
 
 
 scaler = MinMaxScaler()
@@ -49,8 +64,14 @@ scaler = MinMaxScaler()
 test_image_flair = scaler.fit_transform(test_image_flair.reshape(-1, test_image_flair.shape[-1])).reshape(test_image_flair.shape)
 
 
+# In[38]:
+
+
 print("Min: ", test_image_flair.min())
 print("Max: ", test_image_flair.max())
+
+
+# In[39]:
 
 
 # rescaling t1
@@ -67,6 +88,9 @@ test_image_t2 = scaler.fit_transform(test_image_t2.reshape(-1, test_image_t2.sha
 
 # we will not rescale the mask
 test_image_seg = nib.load(TEST_DATASET_PATH + '/BraTS19_2013_0_1/BraTS19_2013_0_1_seg.nii').get_fdata()
+
+
+# In[40]:
 
 
 slice = 45
@@ -100,6 +124,9 @@ plt.subplot(2, 3, 5)
 plt.imshow(test_image_seg[:,:,slice])
 plt.title('Mask')
 plt.savefig('Images with segmentations.png')
+
+
+# In[41]:
 
 
 slice = 65
@@ -136,6 +163,9 @@ plt.subplot(1, 1, 1)
 plt.imshow(rotate(montage(test_image_t1ce[:,:,:]), 90, resize=True), cmap ='gray')
 
 
+# In[43]:
+
+
 import matplotlib
 # Plotting the segmantation
 cmap = matplotlib.colors.ListedColormap(['#440054', '#3b528b', '#18b880', '#e6d74f'])
@@ -145,6 +175,9 @@ norm = matplotlib.colors.BoundaryNorm([-0.5, 0.5, 1.5, 2.5, 3.5], cmap.N)
 plt.imshow(test_image_seg[:,:,65], cmap=cmap, norm=norm)
 plt.colorbar()
 plt.savefig('segmentations.png')
+
+
+# In[44]:
 
 
 # Isolation of class 0
@@ -188,9 +221,12 @@ ax[4].set_title('Enhancing Tumor (class 4)')
 plt.savefig('all segmentations.png')
 
 
+
+# In[45]:
+
+
 # lists of directories with studies
 train_and_val_directories = [f.path for f in os.scandir(TRAIN_DATASET_PATH) if f.is_dir()]
-#train_and_val_directories = [f.path for f in os.scandir(TRAIN_DATASET_PATH) if f.is_dir() and f.name.startswith('BraTS19_TCIA13')]
 
 def pathListIntoIds(dirList):
     x = []
@@ -227,7 +263,7 @@ SEGMENT_CLASSES = {
 }
 
 # Select Slices and Image Size
-VOLUME_SLICES = 10
+VOLUME_SLICES = 10 #100
 VOLUME_START_AT = 22 # first slice of volume that we will include
 IMG_SIZE=128
 
@@ -292,6 +328,7 @@ class BrainDataset(Dataset):
         
         # Prepare segmentation mask
         y_slice = seg[:, :, slice_pos]
+        #print(y_slice)
         # Convert class 4 to class 3
         y_slice[y_slice == 4] = 3
         # print(y_slice)
@@ -390,7 +427,7 @@ valid_dataset = BrainDataset(val_ids, shuffle=False)
 valid_loader = DataLoader(valid_dataset, batch_size=8, shuffle=False, num_workers=4)
 
 #test_dataset = BrainDataset(test_ids, shuffle=False)
-#test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False, num_workers=4)
+#test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False, num_workers=2)
 
 
 # In[55]:
@@ -436,6 +473,9 @@ slice_segmentation = np.argmax(Y_numpy, axis=-1)
 display_slice_and_segmentation(slice_flair, slice_t1ce, slice_segmentation)
 
 
+# In[60]:
+
+
 # Dice loss as defined above for 4 classes
 def dice_coef(y_true, y_pred, smooth=1.0):
     """
@@ -462,6 +502,9 @@ def dice_coef(y_true, y_pred, smooth=1.0):
     return total_loss / class_num
 
 
+# In[61]:
+
+
 # Define per class evaluation of dice coefficient
 def dice_coef_necrotic(y_true, y_pred, epsilon=1e-6):
     """
@@ -486,6 +529,9 @@ def dice_coef_enhancing(y_true, y_pred, epsilon=1e-6):
     intersection = torch.sum(torch.abs(y_true[:, 3, :, :] * y_pred[:, 3, :, :]))
     return (2.0 * intersection) / (torch.sum(torch.square(y_true[:, 3, :, :])) + 
                                   torch.sum(torch.square(y_pred[:, 3, :, :])) + epsilon)
+
+
+# In[62]:
 
 
 # Computing Precision
@@ -899,7 +945,6 @@ def evaluate_model(model, dataloader, device):
 
 from collections import defaultdict
 import csv
-
 
 # Training loop
 num_epochs = 10

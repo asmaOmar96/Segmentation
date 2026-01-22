@@ -27,7 +27,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 torch.manual_seed(161)
 
-#TRAIN_DATASET_PATH = "MICCAI_BraTS_2019_Data_Training/LGG/"
+TRAIN_DATASET_PATH = "MICCAI_BraTS_2019_Data_Training/LGG/"
 #TEST_DATASET_PATH = "MICCAI_BraTS_2019_Data_Training/LGG/"
 
 
@@ -54,7 +54,7 @@ SEGMENT_CLASSES = {
 }
 
 # Select Slices and Image Size
-VOLUME_SLICES = 10
+VOLUME_SLICES = 10 #100
 VOLUME_START_AT = 22 # first slice of volume that we will include
 IMG_SIZE=128
 
@@ -119,7 +119,7 @@ class BrainDataset(Dataset):
         
         # Prepare segmentation mask
         y_slice = seg[:, :, slice_pos]
-        print(y_slice)
+        #print(y_slice)
         # Convert class 4 to class 3
         y_slice[y_slice == 4] = 3
         # print(y_slice)
@@ -229,9 +229,6 @@ def specificity(y_true, y_pred, epsilon=1e-7):
     true_negatives = torch.sum(torch.round(torch.clamp((1 - y_true) * (1 - y_pred), 0, 1)))
     possible_negatives = torch.sum(torch.round(torch.clamp(1 - y_true, 0, 1)))
     return true_negatives / (possible_negatives + epsilon)
-
-
-# In[63]:
 
 
 class UNet(nn.Module):
@@ -537,7 +534,8 @@ def plot_training_history(history):
 # Plot training history
 checkpoint = torch.load(best_model_path, map_location=device, weights_only=False )
 
-history = torch.load("training_history.pth")
+history = torch.load("training_history.pth", weights_only=False)
+print('history is loaded')
 history.keys()
 #df = pd.read_csv("training.log")
 #history = {
@@ -549,4 +547,5 @@ history.keys()
 #    'val_dice_coef': df['val_dice_coef'].tolist(),
 #    'learning_rate': df['learning_rate'].tolist() if 'learning_rate' in df else None
 #}
+
 plot_training_history(history)

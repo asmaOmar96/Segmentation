@@ -31,6 +31,7 @@ import os
 import glob
 import matplotlib.pyplot as plt
 
+TEST_DATASET_PATH = "MICCAI_BraTS_2019_Data_Training/LGG/"
 
 torch.manual_seed(161)
 
@@ -105,7 +106,7 @@ class BrainDataset(Dataset):
         
         # Prepare segmentation mask
         y_slice = seg[:, :, slice_pos]
-        print(y_slice)
+        #print(y_slice)
         # Convert class 4 to class 3
         y_slice[y_slice == 4] = 3
         # print(y_slice)
@@ -154,9 +155,6 @@ def dice_coef(y_true, y_pred, smooth=1.0):
         total_loss += loss
     
     return total_loss / class_num
-
-
-# In[61]:
 
 
 # Define per class evaluation of dice coefficient
@@ -215,9 +213,6 @@ def specificity(y_true, y_pred, epsilon=1e-7):
     true_negatives = torch.sum(torch.round(torch.clamp((1 - y_true) * (1 - y_pred), 0, 1)))
     possible_negatives = torch.sum(torch.round(torch.clamp(1 - y_true, 0, 1)))
     return true_negatives / (possible_negatives + epsilon)
-
-
-# In[63]:
 
 
 class UNet(nn.Module):
@@ -584,8 +579,9 @@ def showPredictsById(case, model, device, start_slice=60):
         start_slice: Starting slice index for visualization
     """
     # Construct paths
-    path = f"/kaggle/working/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData/BraTS20_Training_{case}"
-    
+    #path = f"/kaggle/working/BraTS2020_TrainingData/MICCAI_BraTS2020_TrainingData/BraTS20_Training_{case}"
+    path = os.path.join(TEST_DATASET_PATH, case)
+
     # Load ground truth and original image
     gt = nib.load(os.path.join(path, f'BraTS20_Training_{case}_seg.nii')).get_fdata()
     origImage = nib.load(os.path.join(path, f'BraTS20_Training_{case}_flair.nii')).get_fdata()
