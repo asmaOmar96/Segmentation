@@ -22,7 +22,7 @@ srun nvidia-smi
 srun python main.py 
 
 ## TRAINING
-srun python train1.py 
+srun python train.py 
 
 # EVALUATION
 #srun python evaluate.py
