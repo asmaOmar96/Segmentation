@@ -27,7 +27,7 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 torch.manual_seed(161)
 
-#TRAIN_DATASET_PATH = "MICCAI_BraTS_2019_Data_Training/LGG/"
+TRAIN_DATASET_PATH = "MICCAI_BraTS_2019_Data_Training/LGG/"
 
 # lists of directories with studies
 #train_and_val_directories = [f.path for f in os.scandir(TRAIN_DATASET_PATH) if f.is_dir()]
@@ -52,9 +52,9 @@ torch.manual_seed(161)
 #}
 
 # Select Slices and Image Size
-#VOLUME_SLICES = 10
-#VOLUME_START_AT = 22 # first slice of volume that we will include
-#IMG_SIZE=128
+VOLUME_SLICES = 10
+VOLUME_START_AT = 22 # first slice of volume that we will include
+IMG_SIZE=128
 
 
 # In[59]:
